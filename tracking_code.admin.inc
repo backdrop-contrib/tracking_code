@@ -287,7 +287,7 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#type' => 'checkboxes',
     '#title' => t('User Roles'),
     '#options' => user_roles(),
-    '#description' => t('Show this tracking code only to users of a specific Drupal role.'),
+    '#description' => t('Show this tracking code only to users of a specific Drupal role. If you select no roles, this snippet will be shown for all roles.'),
   );
   if (isset($snippet['roles'])) {
     $form['tracking_code_options']['tracking_code_roles']['#default_value'] = unserialize($snippet['roles']);
