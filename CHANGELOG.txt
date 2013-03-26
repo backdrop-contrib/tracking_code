@@ -17,3 +17,13 @@ Tracking Code 1.3
   Bug Fixes
    - #1752338 -- Fixed inability to specify <front> as path
    - #1828678 -- Fixed bug where only clean URL path was checked
+
+Tracking Code 1.4
+=================
+
+  New Features
+   - #1852840 -- Ability to define tracking code visibility by user role
+
+  Bug Fixes
+   - #1911998 -- Use Drupal's static caching instead of $_SESSION
+                 (special thanks to digital006)

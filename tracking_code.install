@@ -7,24 +7,10 @@
 
 /**
  * Implements hook_schema().
- * @todo Finish making this exportable.
  */
 function tracking_code_schema() {
   $schema['tracking_code'] = array(
     'description' => 'A table to hold tracking code snippets.',
-    'export' => array(
-      'key' => 'tcid',
-      'identifier' => 'tracking_code',
-      // Function hook name.
-      'default hook' => 'default_mymodule_myobj',
-      'api' => array(
-        'owner' => 'mymodule',
-        // Base name for api include files.
-        'api' => 'default_mymodule_myobjs',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
     'fields' => array(
       'tcid' => array(
         'description' => 'The primary indentifier of a tracking code snippet',
@@ -76,15 +62,36 @@ function tracking_code_schema() {
         'description' => 'Contents of the "Pages" block; contains a list of paths on which to include/exclude the tracking code.',
         'type' => 'text',
         'not null' => TRUE,
+        'default' => '',
       ),
       'content_types' => array(
         'description' => 'A serialized array of key=>value pairs that specify which content type nodes to display a tracking code block on.',
         'type' => 'text',
         'not null' => TRUE,
+        'default' => serialize(array()),
+      ),
+      'roles' => array(
+        'description' => 'A serialized array of key=>value pairs that specify which user roles to display a tracking code block on.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => serialize(array()),
       ),
     ),
     'primary key' => array('tcid'),
   );
 
   return $schema;
+}
+
+/**
+ * Adding a "roles" column for user role visibility.
+ */
+function tracking_code_update_7100() {
+  // 7.x-1.4 -- Adding user role visibility restrictions.
+  db_add_field( 'tracking_code', 'roles', array(
+    'type' => 'text',
+    'description' => 'A serialized array of key=>value pairs that specify which user roles to display a tracking code block on.',
+    'not null' => TRUE,
+    'default' => serialize(array()),
+  ));
 }

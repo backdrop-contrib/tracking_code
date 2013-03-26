@@ -15,13 +15,13 @@ define('TRACKING_CODE_VISIBILITY_LISTED', 1);
  * Implements hook_init().
  */
 function tracking_code_init() {
-  $_SESSION['tracking_code'] = _tracking_code_enabled_by_region();
+  $snippets = _tracking_code_enabled_by_region();
 
   $node = menu_get_object();
 
   // Render tracking_code in <HEAD> immediately.
   // Other tracking_code will be rendered by hook_page_alter().
-  foreach ($_SESSION['tracking_code']['header'] as $id => $snippet) {
+  foreach ($snippets['header'] as $id => $snippet) {
     drupal_add_html_head(array(
       '#type' => 'markup',
       '#markup' => token_replace($snippet->code, array('node' => $node)),
@@ -34,15 +34,12 @@ function tracking_code_init() {
  * Implements hook_page_alter().
  */
 function tracking_code_page_alter(&$page) {
-  // Don't try to run foreach if tracking code doesn't exist.
-  if (!isset($_SESSION['tracking_code'])) {
-    return;
-  }
+  $snippets = _tracking_code_enabled_by_region();
 
   $node = menu_get_object();
 
   // Render "After <BODY>" tracking code.
-  foreach ($_SESSION['tracking_code']['page_top'] as $snippet) {
+  foreach ($snippets['page_top'] as $snippet) {
     $page['page_top']['tracking_code'][$snippet->name] = array(
       '#markup' => token_replace($snippet->code, array('node' => $node)),
       '#weight' => $snippet->weight,
@@ -50,14 +47,12 @@ function tracking_code_page_alter(&$page) {
   }
 
   // Render "Before </BODY>" tracking code.
-  foreach ($_SESSION['tracking_code']['page_bottom'] as $snippet) {
+  foreach ($snippets['page_bottom'] as $snippet) {
     $page['page_bottom']['tracking_code'][$snippet->name] = array(
       '#markup' => token_replace($snippet->code, array('node' => $node)),
       '#weight' => $snippet->weight,
     );
   }
-
-  unset($_SESSION['tracking_code']);
 }
 
 /**
@@ -178,6 +173,12 @@ function _tracking_code_read($delta) {
  *   an array of active tracking code objects, organized by region
  */
 function _tracking_code_enabled_by_region() {
+  $snippets = &drupal_static(__FUNCTION__);
+
+  if (isset($snippets)) {
+    return $snippets;
+  }
+
   $node = menu_get_object();
 
   $snippets = array(
@@ -191,14 +192,24 @@ function _tracking_code_enabled_by_region() {
     ->condition('status', '1', '=')
     ->execute();
 
-
   // Check page-level visibility.
   foreach ($results as $snippet) {
     $content_types = unserialize($snippet->content_types);
+    $roles = unserialize($snippet->roles);
     $selected_types = array();
+    $selected_roles = array();
+
+    // Build list of content types.
     foreach ($content_types as $type => $status) {
       if ($status) {
         $selected_types[] = $type;
+      }
+    }
+
+    // Build list of roles.
+    foreach ($roles as $role_id => $status) {
+      if ($status) {
+        $selected_roles[] = $role_id;
       }
     }
 
@@ -226,6 +237,23 @@ function _tracking_code_enabled_by_region() {
     // Unset snippet if not in selected content types.
     if (!empty($selected_types)) {
       if (!$node || !in_array($node->type, $selected_types)) {
+        unset($snippets[$snippet->region][$snippet->tcid]);
+      }
+    }
+
+    // Unset snippet if not in selected user roles.
+    if (!empty($selected_roles)) {
+      global $user;
+      dsm($user);
+      $show = FALSE;
+      foreach ($user->roles as $role_id => $role) {
+        if (in_array($role_id, $selected_roles)) {
+          $show = TRUE;
+          break;
+        }
+      }
+
+      if (!$show) {
         unset($snippets[$snippet->region][$snippet->tcid]);
       }
     }

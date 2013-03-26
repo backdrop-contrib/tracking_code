@@ -283,6 +283,16 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#description' => t('Show this tracking code only on pages that display content of the given type(s). If you select no types, there will be no type-specific limitation.'),
   );
 
+  $form['tracking_code_options']['tracking_code_roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('User Roles'),
+    '#options' => user_roles(),
+    '#description' => t('Show this tracking code only to users of a specific Drupal role.'),
+  );
+  if (isset($snippet['roles'])) {
+    $form['tracking_code_options']['tracking_code_roles']['#default_value'] = unserialize($snippet['roles']);
+  }
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Snippet'),
@@ -390,6 +400,7 @@ function tracking_code_add_form_submit($form, &$form_state) {
       'visibility' => 1,
       'pages' => '',
       'content_types' => serialize(array()),
+      'roles' => serialize(array()),
     ))
     ->execute();
 
@@ -410,6 +421,7 @@ function tracking_code_edit_form_submit($form, &$form_state) {
       'visibility' => $form_state['values']['tracking_code_visibility'],
       'pages' => $form_state['values']['tracking_code_pages'],
       'content_types' => serialize($form_state['values']['tracking_code_content_types']),
+      'roles' => serialize($form_state['values']['tracking_code_roles']),
     ))
     ->condition('tcid', $form_state['values']['delta'], '=')
     ->execute();
