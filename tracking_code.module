@@ -244,7 +244,6 @@ function _tracking_code_enabled_by_region() {
     // Unset snippet if not in selected user roles.
     if (!empty($selected_roles)) {
       global $user;
-      dsm($user);
       $show = FALSE;
       foreach ($user->roles as $role_id => $role) {
         if (in_array($role_id, $selected_roles)) {
