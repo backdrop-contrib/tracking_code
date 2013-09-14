@@ -92,6 +92,6 @@ function tracking_code_update_7100() {
     'type' => 'text',
     'description' => 'A serialized array of key=>value pairs that specify which user roles to display a tracking code block on.',
     'not null' => TRUE,
-    'default' => serialize(array()),
+    'initial' => serialize(array()),
   ));
 }
