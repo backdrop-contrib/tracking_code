@@ -23,6 +23,7 @@ Tracking Code 1.4
 
   New Features
    - #1852840 -- Ability to define tracking code visibility by user role
+   - #2024537 -- Adding "configure" link to .info file for convenience
 
   Bug Fixes
    - #1911998 -- Use Drupal's static caching instead of $_SESSION
