@@ -34,17 +34,15 @@ Configuration
     snippet, editing a snippet, or deleting a snippet.
   * The "Add Tracking Code" tab will display a form for creating a new snippet.
   * Once you've added a snippet, you are presented with further configuration
-    options such as changing the active/inactive status, white/black listing
-    page visibility, and choosing content types to restrict visiblity to. These
-    options were designed to look/feel/behave similar to Drupal's core block
-    module.
+    options. Visibility options include Drupal path, content type, and user
+    role. These options were designed to look/feel/behave similar to Drupal's
+    core block module.
 
 
 Acknowledgements
 ================
   Initial development of the tracking_code module was sponsored by Allora Media
-  (http://www.alloramedia.com). 
-
+  (http://www.alloramedia.com).
 
 Author
 ======
