@@ -17,16 +17,19 @@ define('TRACKING_CODE_VISIBILITY_LISTED', 1);
 function tracking_code_init() {
   $snippets = _tracking_code_enabled_by_region();
 
-  $node = menu_get_object();
+  // Check to see if there are tracking codes first.
+  if (!empty($snippets['header'])) {
+    $node = menu_get_object();
 
-  // Render tracking_code in <HEAD> immediately.
-  // Other tracking_code will be rendered by hook_page_alter().
-  foreach ($snippets['header'] as $id => $snippet) {
-    drupal_add_html_head(array(
-      '#type' => 'markup',
-      '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-      '#weight' => $snippet->weight,
-    ), 'tracking_code_' . $id);
+    // Render tracking_code in <HEAD> immediately.
+    // Other tracking_code will be rendered by hook_page_alter().
+    foreach ($snippets['header'] as $id => $snippet) {
+      drupal_add_html_head(array(
+        '#type' => 'markup',
+        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
+        '#weight' => $snippet->weight,
+      ), 'tracking_code_' . $id);
+    }
   }
 }
 
@@ -36,22 +39,25 @@ function tracking_code_init() {
 function tracking_code_page_alter(&$page) {
   $snippets = _tracking_code_enabled_by_region();
 
-  $node = menu_get_object();
+  // Check to see if there are tracking codes first.
+  if (!empty($snippets['page_top']) || !empty($snippets['page_bottom'])) {
+    $node = menu_get_object();
 
-  // Render "After <BODY>" tracking code.
-  foreach ($snippets['page_top'] as $snippet) {
-    $page['page_top']['tracking_code'][$snippet->name] = array(
-      '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-      '#weight' => $snippet->weight,
-    );
-  }
+    // Render "After <BODY>" tracking code.
+    foreach ($snippets['page_top'] as $snippet) {
+      $page['page_top']['tracking_code'][$snippet->name] = array(
+        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
+        '#weight' => $snippet->weight,
+      );
+    }
 
-  // Render "Before </BODY>" tracking code.
-  foreach ($snippets['page_bottom'] as $snippet) {
-    $page['page_bottom']['tracking_code'][$snippet->name] = array(
-      '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-      '#weight' => $snippet->weight,
-    );
+    // Render "Before </BODY>" tracking code.
+    foreach ($snippets['page_bottom'] as $snippet) {
+      $page['page_bottom']['tracking_code'][$snippet->name] = array(
+        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
+        '#weight' => $snippet->weight,
+      );
+    }
   }
 }
 
