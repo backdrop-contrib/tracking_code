@@ -416,7 +416,8 @@ function tracking_code_overview_form_validate($form, $form_state) {
 function tracking_code_overview_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $key => $value) {
     if (preg_match('/^weight_[0-9]+$/', $key)) {
-      $tcid = end(explode('weight_', $key));
+      $explode = explode('weight_', $key);
+      $tcid = end($explode);
       db_update('tracking_code')
         ->fields(array('weight' => $value))
         ->condition('tcid', $tcid, '=')
