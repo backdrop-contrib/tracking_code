@@ -183,7 +183,7 @@ function tracking_code_add_form() {
   if (module_exists('token')) {
     $form['tracking_code_tokens']['#default_value'] = TRUE;
     $form['tokens'] = array(
-      '#theme' => 'token_tree',
+      '#theme' => 'token_tree_link',
       '#token_types' => array('node'),
       '#global_types' => TRUE,
       '#click_insert' => TRUE,
@@ -253,7 +253,7 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
 
   if (module_exists('token')) {
     $form['tokens'] = array(
-      '#theme' => 'token_tree',
+      '#theme' => 'token_tree_link',
       '#token_types' => array('node'),
       '#global_types' => TRUE,
       '#click_insert' => TRUE,
