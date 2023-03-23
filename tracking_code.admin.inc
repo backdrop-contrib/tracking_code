@@ -173,7 +173,15 @@ function tracking_code_add_form() {
     '#description' => t('Paste your tracking code here'),
   );
 
+  $form['tracking_code_tokens'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace tokens'),
+    '#description' => t('If no tokens are used in this snippet, deselect this to improve performance.'),
+    '#default_value' => FALSE,
+  );
+
   if (module_exists('token')) {
+    $form['tracking_code_tokens']['#default_value'] = TRUE;
     $form['tokens'] = array(
       '#theme' => 'token_tree',
       '#token_types' => array('node'),
@@ -234,6 +242,13 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#title' => t('Code'),
     '#description' => t('Enter your tracking code snippet here'),
     '#default_value' => $snippet['code'],
+  );
+
+  $form['tracking_code_tokens'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace tokens'),
+    '#description' => t('If no tokens are used in this snippet, deselect this to improve performance.'),
+    '#default_value' => $snippet['tokens'],
   );
 
   if (module_exists('token')) {
@@ -425,6 +440,7 @@ function tracking_code_add_form_submit($form, &$form_state) {
       'pages' => '',
       'content_types' => serialize(array()),
       'roles' => serialize(array()),
+      'tokens' => $form_state['values']['tracking_code_tokens'],
     ))
     ->execute();
 
@@ -446,6 +462,7 @@ function tracking_code_edit_form_submit($form, &$form_state) {
       'pages' => $form_state['values']['tracking_code_pages'],
       'content_types' => serialize($form_state['values']['tracking_code_content_types']),
       'roles' => serialize($form_state['values']['tracking_code_roles']),
+      'tokens' => $form_state['values']['tracking_code_tokens'],
     ))
     ->condition('tcid', $form_state['values']['delta'], '=')
     ->execute();
