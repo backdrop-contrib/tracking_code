@@ -12,10 +12,10 @@
  *   the themed output for the admin overview page
  */
 function tracking_code_admin_overview() {
-  drupal_add_css(drupal_get_path('module', 'tracking_code') . '/css/tracking_code.css');
+  backdrop_add_css(backdrop_get_path('module', 'tracking_code') . '/css/tracking_code.css');
   //make sure we have the ajax library
-  drupal_add_library('system', 'drupal.ajax');
-  $output = drupal_get_form('tracking_code_overview_form');
+  backdrop_add_library('system', 'backdrop.ajax');
+  $output = backdrop_get_form('tracking_code_overview_form');
 
   return $output;
 }
@@ -55,13 +55,13 @@ function theme_tracking_code_overview_table($variables) {
     // Build a row for each snippet.
     foreach ($snippets as $id => $snippet) {
       $actions = array();
-      $enabled = ($snippet->status) ? t('Disable') : t('Enable');
+      $enabled = ($snippet->status)?t('Disable') : t('Enable');
       $query = array(
-          'token' => drupal_get_token('disable_tc_snippet' . $snippet->tcid),
-        ) + drupal_get_destination();
+        'token' => backdrop_get_token('disable_tc_snippet' . $snippet->tcid),
+      ) + backdrop_get_destination();
       $actions = array(
-        l($enabled, 'admin/structure/tracking_code/disable/nojs/' . $snippet->tcid , array(
-          'attributes' => array('class' => array('tracking-code-toggle-link','use-ajax')),
+        l($enabled, 'admin/structure/tracking_code/disable/nojs/' . $snippet->tcid, array(
+          'attributes' => array('class' => array('tracking-code-toggle-link', 'use-ajax')),
           'query' => $query,
         )),
         l(t('Configure'), 'admin/structure/tracking_code/' . $snippet->tcid . '/edit'),
@@ -79,11 +79,11 @@ function theme_tracking_code_overview_table($variables) {
             'class' => 'tracking-code-code',
           ),
           implode(' | ', $actions),
-          drupal_render($form['tracking_code'][$region]['weight_' . $snippet->tcid]),
+          backdrop_render($form['tracking_code'][$region]['weight_' . $snippet->tcid]),
         ),
         // Make all rows draggable.
-        'class' => ($snippet->status) ? array('draggable') : array('draggable tracking-code-disabled'),
-        'id' => 'tcid-'. $snippet->tcid,
+        'class' => ($snippet->status)?array('draggable') : array('draggable tracking-code-disabled'),
+        'id' => 'tcid-' . $snippet->tcid,
       );
     }
 
@@ -107,10 +107,10 @@ function theme_tracking_code_overview_table($variables) {
       'attributes' => array('id' => 'tracking-code-admin-table-' . $region),
     ));
 
-    drupal_add_tabledrag('tracking-code-admin-table-' . $region, 'order', 'siblings', 'snippet-weight');
+    backdrop_add_tabledrag('tracking-code-admin-table-' . $region, 'order', 'siblings', 'snippet-weight');
   }
 
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
 
   return $output;
 }
@@ -141,7 +141,10 @@ function tracking_code_overview_form() {
       $form['tracking_code'][$region]['weight_' . $id] = array(
         '#type' => 'textfield',
         '#default_value' => $snippet->weight,
-        '#attributes' => array('class' => array('snippet-weight'), 'size' => 3),
+        '#attributes' => array(
+          'class' => array('snippet-weight'),
+          'size' => 3,
+        ),
       );
     }
   }
@@ -173,17 +176,9 @@ function tracking_code_add_form() {
     '#description' => t('Paste your tracking code here'),
   );
 
-  $form['tracking_code_tokens'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Replace tokens'),
-    '#description' => t('If no tokens are used in this snippet, deselect this to improve performance.'),
-    '#default_value' => FALSE,
-  );
-
   if (module_exists('token')) {
-    $form['tracking_code_tokens']['#default_value'] = TRUE;
     $form['tokens'] = array(
-      '#theme' => 'token_tree_link',
+      '#theme' => 'token_tree',
       '#token_types' => array('node'),
       '#global_types' => TRUE,
       '#click_insert' => TRUE,
@@ -213,7 +208,7 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
 
   // Don't show a blank edit form.
   if (!$snippet) {
-    drupal_not_found();
+    backdrop_not_found();
     exit();
   }
 
@@ -234,7 +229,10 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#title' => t('Enable Tracking Code'),
     '#description' => t("Tracking code snippets are disabled by default, so you won't accidentally make tracking code live if you didn't intend to."),
     '#default_value' => $snippet['status'],
-    '#options' => array(1 => t('Active'), 0 => t('Disabled')),
+    '#options' => array(
+      1 => t('Active'),
+      0 => t('Disabled'),
+    ),
   );
 
   $form['tracking_code_code'] = array(
@@ -244,16 +242,9 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#default_value' => $snippet['code'],
   );
 
-  $form['tracking_code_tokens'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Replace tokens'),
-    '#description' => t('If no tokens are used in this snippet, deselect this to improve performance.'),
-    '#default_value' => $snippet['tokens'],
-  );
-
   if (module_exists('token')) {
     $form['tokens'] = array(
-      '#theme' => 'token_tree_link',
+      '#theme' => 'token_tree',
       '#token_types' => array('node'),
       '#global_types' => TRUE,
       '#click_insert' => TRUE,
@@ -306,7 +297,7 @@ function tracking_code_edit_form($form, &$form_state, $delta) {
     '#type' => 'checkboxes',
     '#title' => t('User Roles'),
     '#options' => user_roles(),
-    '#description' => t('Show this tracking code only to users of a specific Drupal role. If you select no roles, this snippet will be shown for all roles.'),
+    '#description' => t('Show this tracking code only to users of a specific Backdrop role. If you select no roles, this snippet will be shown for all roles.'),
   );
   if (isset($snippet['roles'])) {
     $form['tracking_code_options']['tracking_code_roles']['#default_value'] = unserialize($snippet['roles']);
@@ -334,12 +325,18 @@ function tracking_code_delete_form($form, &$form_state, $delta) {
 
   // Don't show a blank delete form.
   if (!$snippet) {
-    drupal_not_found();
+    backdrop_not_found();
     exit();
   }
 
-  $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
-  $form['snippet_name'] = array('#type' => 'hidden', '#values' => $snippet['name']);
+  $form['delta'] = array(
+    '#type' => 'hidden',
+    '#value' => $delta,
+  );
+  $form['snippet_name'] = array(
+    '#type' => 'hidden',
+    '#values' => $snippet['name'],
+  );
 
   return confirm_form($form, t('Are you sure you want to delete the tracking code snippet %name?', array('%name' => $snippet['name'])), 'admin/structure/tracking_code', '', t('Delete'), t('Cancel'));
 }
@@ -357,7 +354,7 @@ function tracking_code_delete_form($form, &$form_state, $delta) {
  */
 function tracking_code_ajax_disable($ajax, $tcid) {
   //Check for a proper token
-  if (empty($_GET['token']) || !drupal_valid_token($_GET['token'], 'disable_tc_snippet' . $tcid)) {
+  if (empty($_GET['token']) || !backdrop_valid_token($_GET['token'], 'disable_tc_snippet' . $tcid)) {
     return MENU_ACCESS_DENIED;
   }
   $snippet = _tracking_code_read($tcid);
@@ -370,7 +367,7 @@ function tracking_code_ajax_disable($ajax, $tcid) {
 
   if ($is_ajax) {
     $commands = array();
-    $enabled = ($status) ? t('Disable') : t('Enable');
+    $enabled = ($status)?t('Disable') : t('Enable');
     //build the proper ajax commands
     $commands[] = ajax_command_invoke('#tcid-' . $tcid . ' a.tracking-code-toggle-link', 'html', array($enabled));
     if ($status) {
@@ -386,8 +383,8 @@ function tracking_code_ajax_disable($ajax, $tcid) {
     );
   }
   else {
-    drupal_set_message(t('Disabled snippet: @name', array('@name' => $snippet['name'])));
-    drupal_goto();
+    backdrop_set_message(t('Disabled snippet: @name', array('@name' => $snippet['name'])));
+    backdrop_goto();
   }
 }
 
@@ -416,15 +413,14 @@ function tracking_code_overview_form_validate($form, $form_state) {
 function tracking_code_overview_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $key => $value) {
     if (preg_match('/^weight_[0-9]+$/', $key)) {
-      $explode = explode('weight_', $key);
-      $tcid = end($explode);
+      $tcid = end(explode('weight_', $key));
       db_update('tracking_code')
         ->fields(array('weight' => $value))
         ->condition('tcid', $tcid, '=')
         ->execute();
     }
   }
-  drupal_set_message(t('Tracking code weights have been updated.'));
+  backdrop_set_message(t('Tracking code weights have been updated.'));
 }
 
 /**
@@ -433,20 +429,19 @@ function tracking_code_overview_form_submit($form, &$form_state) {
 function tracking_code_add_form_submit($form, &$form_state) {
   $tcid = db_insert('tracking_code')
     ->fields(array(
-      'name' => $form_state['values']['tracking_code_name'],
-      'code' => $form_state['values']['tracking_code_code'],
-      'status' => 0,
-      'weight' => 0,
-      'visibility' => 1,
-      'pages' => '',
-      'content_types' => serialize(array()),
-      'roles' => serialize(array()),
-      'tokens' => $form_state['values']['tracking_code_tokens'],
-    ))
+    'name' => $form_state['values']['tracking_code_name'],
+    'code' => $form_state['values']['tracking_code_code'],
+    'status' => 0,
+    'weight' => 0,
+    'visibility' => 1,
+    'pages' => '',
+    'content_types' => serialize(array()),
+    'roles' => serialize(array()),
+  ))
     ->execute();
 
   $form_state['redirect'] = 'admin/structure/tracking_code/' . $tcid . '/edit';
-  drupal_set_message(t('Created new tracking code "%name."', array('%name' => $form_state['values']['tracking_code_name'])));
+  backdrop_set_message(t('Created new tracking code "%name."', array('%name' => $form_state['values']['tracking_code_name'])));
 }
 
 /**
@@ -455,21 +450,20 @@ function tracking_code_add_form_submit($form, &$form_state) {
 function tracking_code_edit_form_submit($form, &$form_state) {
   db_update('tracking_code')
     ->fields(array(
-      'name' => $form_state['values']['tracking_code_name'],
-      'code' => $form_state['values']['tracking_code_code'],
-      'region' => $form_state['values']['tracking_code_region'],
-      'status' => $form_state['values']['tracking_code_status'],
-      'visibility' => $form_state['values']['tracking_code_visibility'],
-      'pages' => $form_state['values']['tracking_code_pages'],
-      'content_types' => serialize($form_state['values']['tracking_code_content_types']),
-      'roles' => serialize($form_state['values']['tracking_code_roles']),
-      'tokens' => $form_state['values']['tracking_code_tokens'],
-    ))
+    'name' => $form_state['values']['tracking_code_name'],
+    'code' => $form_state['values']['tracking_code_code'],
+    'region' => $form_state['values']['tracking_code_region'],
+    'status' => $form_state['values']['tracking_code_status'],
+    'visibility' => $form_state['values']['tracking_code_visibility'],
+    'pages' => $form_state['values']['tracking_code_pages'],
+    'content_types' => serialize($form_state['values']['tracking_code_content_types']),
+    'roles' => serialize($form_state['values']['tracking_code_roles']),
+  ))
     ->condition('tcid', $form_state['values']['delta'], '=')
     ->execute();
 
   $form_state['redirect'] = 'admin/structure/tracking_code';
-  drupal_set_message(t('Updated tracking code "%name."', array('%name' => $form_state['values']['tracking_code_name'])));
+  backdrop_set_message(t('Updated tracking code "%name."', array('%name' => $form_state['values']['tracking_code_name'])));
 }
 
 /**
@@ -481,5 +475,5 @@ function tracking_code_delete_form_submit($form, &$form_state) {
     ->execute();
 
   $form_state['redirect'] = 'admin/structure/tracking_code';
-  drupal_set_message(t('Deleted tracking code "%name."', array('%name' => $form_state['values']['snippet_name'])));
+  backdrop_set_message(t('Deleted tracking code "%name."', array('%name' => $form_state['values']['snippet_name'])));
 }

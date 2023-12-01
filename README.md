@@ -1,8 +1,7 @@
-Tracking Code Module
-
+Tracking Code
 
 Description
-===========
+------------------
   A module that allows admins to create tracking code snippets and control their
   visibility similar to the core Drupal block module. It can be used to inject
   arbitrary code into the <head>, and at the beginning and end of the <body>
@@ -22,28 +21,36 @@ Description
   to change the relative weights of your snippets to make sure they execute in
   the correct order within a given region.
 
-
 Configuration
-=============
-  * Only roles with the "administer tracking code" permission can access the
+-----------
+  - Only roles with the "administer tracking code" permission can access the
     administrative page and configure this module.
-  * To configure the tracking code module, navigate to:
+  - To configure the tracking code module, navigate to:
     Admin > Structure > Tracking Code Snippets (/admin/structure/tracking_code)
-  * The "List" tab will display all the tracking code snippets you've created.
+  - The "List" tab will display all the tracking code snippets you've created.
     It provides a drag & drop weight table and links for enabling/disabling a
     snippet, editing a snippet, or deleting a snippet.
-  * The "Add Tracking Code" tab will display a form for creating a new snippet.
-  * Once you've added a snippet, you are presented with further configuration
+  - The "Add Tracking Code" tab will display a form for creating a new snippet.
+  - Once you've added a snippet, you are presented with further configuration
     options. Visibility options include Drupal path, content type, and user
     role. These options were designed to look/feel/behave similar to Drupal's
     core block module.
 
+Maintainers
+-----------
 
-Acknowledgements
-================
-  Initial development of the tracking_code module was sponsored by Allora Media
-  (http://www.alloramedia.com).
+  - [Tim Erickson (stpaultim)](https://github.com/stpaultim)
 
-Author
-======
-  Joe Pitassi (http://drupal.org/user/382188, IRC: ColonelForbinX)
+Credits
+-----------
+
+  - Initial development of the tracking_code module was sponsored by Allora Media
+    (http://www.alloramedia.com).
+  - Drupal Maintainer: Joe Pitassi (http://drupal.org/user/382188, IRC: ColonelForbinX)
+  - Support for this module provided by [Simplo.site](https://www.simplo.site)
+  - Initial port by [Alomgir Hossain](https://github.com/bdalomgir)
+
+License
+-------
+
+This project is GPL v2 software. See the LICENSE.txt file in this directory for complete text.

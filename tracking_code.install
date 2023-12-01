@@ -74,13 +74,6 @@ function tracking_code_schema() {
         'type' => 'text',
         'not null' => TRUE,
       ),
-      'tokens' => array(
-        'description' => 'Flag to indicate whether to replace tokens or not.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 1,
-        'size' => 'tiny',
-      ),
     ),
     'primary key' => array('tcid'),
   );
@@ -88,28 +81,5 @@ function tracking_code_schema() {
   return $schema;
 }
 
-/**
- * Adding a "roles" column for user role visibility.
- */
-function tracking_code_update_7100() {
-  // 7.x-1.4 -- Adding user role visibility restrictions.
-  db_add_field( 'tracking_code', 'roles', array(
-    'type' => 'text',
-    'description' => 'A serialized array of key=>value pairs that specify which user roles to display a tracking code block on.',
-    'not null' => TRUE,
-    'initial' => serialize(array()),
-  ));
-}
-
-/**
- * Adding a "tokens" column for processing tokens.
- */
-function tracking_code_update_7101() {
-  db_add_field('tracking_code', 'tokens', array(
-    'description' => 'Flag to indicate whether to replace tokens or not.',
-    'type' => 'int',
-    'not null' => TRUE,
-    'default' => 1,
-    'size' => 'tiny',
-  ));
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function tracking_code_update_7100() { }

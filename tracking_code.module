@@ -17,47 +17,38 @@ define('TRACKING_CODE_VISIBILITY_LISTED', 1);
 function tracking_code_init() {
   $snippets = _tracking_code_enabled_by_region();
 
-  // Check to see if there are tracking codes first.
-  if (!empty($snippets['header'])) {
-    $node = menu_get_object();
+  $node = menu_get_object();
 
-    // Render tracking_code in <HEAD> immediately.
-    // Other tracking_code will be rendered by hook_page_alter().
-    foreach ($snippets['header'] as $id => $snippet) {
-      drupal_add_html_head(array(
-        '#type' => 'markup',
-        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-        '#weight' => $snippet->weight,
-      ), 'tracking_code_' . $id);
-    }
+  // Render tracking_code in <HEAD> immediately.
+  // Other tracking_code will be rendered by hook_page_alter().
+  foreach ($snippets['header'] as $id => $snippet) {
+    backdrop_add_html_head(array(
+      '#type' => 'markup',
+      '#markup' => token_replace($snippet->code, array('node' => $node)),
+      '#weight' => $snippet->weight,
+    ), 'tracking_code_' . $id);
   }
 }
 
 /**
- * Implements hook_page_alter().
+ * Implements hook_preprocess_page()
  */
-function tracking_code_page_alter(&$page) {
+function tracking_code_preprocess_page(&$variables) {
   $snippets = _tracking_code_enabled_by_region();
+  $node = menu_get_object();
 
-  // Check to see if there are tracking codes first.
-  if (!empty($snippets['page_top']) || !empty($snippets['page_bottom'])) {
-    $node = menu_get_object();
+  // Render "After <BODY>" tracking code.
+  foreach ($snippets['page_top'] as $snippet) {
+    $page_top = token_replace($snippet->code, array('node' => $node));
+    $page = $page_top.''.$variables['page'];
+    $variables['page'] = $page;
+  }
 
-    // Render "After <BODY>" tracking code.
-    foreach ($snippets['page_top'] as $snippet) {
-      $page['page_top']['tracking_code'][$snippet->name] = array(
-        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-        '#weight' => $snippet->weight,
-      );
-    }
-
-    // Render "Before </BODY>" tracking code.
-    foreach ($snippets['page_bottom'] as $snippet) {
-      $page['page_bottom']['tracking_code'][$snippet->name] = array(
-        '#markup' => ($snippet->tokens ? token_replace($snippet->code, array('node' => $node), array('clear' => TRUE)) : $snippet->code),
-        '#weight' => $snippet->weight,
-      );
-    }
+  // Render "Before </BODY>" tracking code.
+  foreach ($snippets['page_bottom'] as $snippet) {
+    $page_bottom = token_replace($snippet->code, array('node' => $node));
+    $page = $variables['page'].''.$page_bottom;
+    $variables['page'] = $page;
   }
 }
 
@@ -85,7 +76,7 @@ function tracking_code_menu() {
   $items['admin/structure/tracking_code/add'] = array(
     'title' => 'Add Tracking Code',
     'description' => 'Create a new tracking code snippet',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tracking_code_add_form'),
     'access arguments' => array('administer tracking code'),
     'file' => 'tracking_code.admin.inc',
@@ -94,7 +85,7 @@ function tracking_code_menu() {
 
   $items['admin/structure/tracking_code/%/edit'] = array(
     'title' => 'Edit Tracking Code',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tracking_code_edit_form', 3),
     'access arguments' => array('administer tracking code'),
     'file' => 'tracking_code.admin.inc',
@@ -104,7 +95,7 @@ function tracking_code_menu() {
   $items['admin/structure/tracking_code/%/delete'] = array(
     'title' => 'Delete Tracking Code',
     'description' => 'Delete an existing tracking code snippet',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('tracking_code_delete_form', 3),
     'access arguments' => array('administer tracking code'),
     'file' => 'tracking_code.admin.inc',
@@ -114,7 +105,7 @@ function tracking_code_menu() {
   $items['admin/structure/tracking_code/disable/nojs/%'] = array(
     'title' => 'Disable/Enable Tracking Code',
     'page callback' => 'tracking_code_ajax_disable',
-    'page arguments' => array(4,5),
+    'page arguments' => array(4, 5),
     'access arguments' => array('administer tracking code'),
     'file' => 'tracking_code.admin.inc',
     'type' => MENU_CALLBACK,
@@ -182,7 +173,7 @@ function _tracking_code_read($delta) {
  *   an array of active tracking code objects, organized by region
  */
 function _tracking_code_enabled_by_region() {
-  $snippets = &drupal_static(__FUNCTION__);
+  $snippets = &backdrop_static(__FUNCTION__);
 
   if (isset($snippets)) {
     return $snippets;
@@ -222,11 +213,11 @@ function _tracking_code_enabled_by_region() {
       }
     }
 
-    // Need to match clean URLs as well as Drupal paths.
-    $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
-    $page_match = drupal_match_path($path, $snippet->pages);
+    // Need to match clean URLs as well as Backdrop paths.
+    $path = backdrop_strtolower(backdrop_get_path_alias($_GET['q']));
+    $page_match = backdrop_match_path($path, $snippet->pages);
     if ($path != $_GET['q']) {
-      $page_match = $page_match || drupal_match_path($_GET['q'], $snippet->pages);
+      $page_match = $page_match || backdrop_match_path($_GET['q'], $snippet->pages);
     }
 
     switch ($snippet->visibility) {
@@ -295,7 +286,7 @@ function _tracking_code_all_by_region() {
 }
 
 /**
- * Sets the Drupal breadcrumb on admin pages.
+ * Sets the Backdrop breadcrumb on admin pages.
  */
 function _tracking_code_set_breadcrumb() {
   $breadcrumb = array(
@@ -305,7 +296,7 @@ function _tracking_code_set_breadcrumb() {
     l(t('Tracking Code Snippets'), 'admin/structure/tracking_code'),
   );
 
-  drupal_set_breadcrumb($breadcrumb);
+  backdrop_set_breadcrumb($breadcrumb);
 }
 
 /**
